@@ -40,6 +40,7 @@ import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.processors.standard.AbstractDatabaseFetchProcessor;
 import org.apache.nifi.processors.standard.db.DatabaseAdapter;
 
+
 import java.io.IOException;
 import java.sql.*;
 import java.text.ParseException;
@@ -212,6 +213,15 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                         // If the table name is static and the fully-qualified key was not found, try just the column name
                         type = columnTypeMap.get(getStateKey(null, colName));
                     }
+
+                    // SAP HANA FIXES
+
+                    if (type == null && !isDynamicTableName) {
+                        // If the table name is static and the fully-qualified key was not found, try just the column name
+                        type = columnTypeMap.get(getStateKey(tableName,colName.replace("\"","")));
+                        logger.error("SAP TYPE " + type);
+                    }
+
                     if (type == null) {
                         // This shouldn't happen as we are populating columnTypeMap when the processor is scheduled or when the first maximum is observed
                         throw new IllegalArgumentException("No column type found for: " + colName);
@@ -264,6 +274,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                             // We haven't pre-populated the column type map if the table name is dynamic, so do it here
                             columnTypeMap.put(fullyQualifiedStateKey, type);
                         }
+
                         try {
                             String newMaxValue = getMaxValueFromRow(resultSet, i, type, resultColumnCurrentMax, dbAdapter.getName());
                             if (newMaxValue != null) {
