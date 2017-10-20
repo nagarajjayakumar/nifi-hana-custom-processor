@@ -232,7 +232,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             });
 
             // Modified specifically to tackle HANA
-            whereClause = StringUtils.join(maxValueClauses, " OR ");
+            whereClause = StringUtils.join(maxValueClauses, " AND ");
             columnsClause = StringUtils.join(maxValueSelectColumns, ", ");
 
             // Build a SELECT query with maximum-value columns (if present)
