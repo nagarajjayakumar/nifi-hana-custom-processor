@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="207c4a9a-01ef-4e80-ade9-434bd7a8b50b" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java" afterPath="$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/nifi-hana-custom-processor/target/" />
@@ -60,8 +61,8 @@
       <file leaf-file-name="GenerateHanaTableFetch.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-334">
-              <caret line="189" column="55" lean-forward="true" selection-start-line="189" selection-start-column="55" selection-end-line="189" selection-end-column="55" />
+            <state relative-caret-position="3893">
+              <caret line="233" column="51" lean-forward="false" selection-start-line="233" selection-start-column="51" selection-end-line="233" selection-end-column="51" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -126,6 +127,8 @@
       <find>generic</find>
       <find>nifi-standard-services-api</find>
       <find>columntype</find>
+      <find>and</find>
+      <find>whereClause</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -476,7 +479,7 @@
       <workItem from="1505833906096" duration="7923000" />
       <workItem from="1483228974631" duration="302000" />
       <workItem from="1506088963415" duration="342000" />
-      <workItem from="1507823303348" duration="1344000" />
+      <workItem from="1507823303348" duration="2013000" />
     </task>
     <servers />
   </component>
@@ -504,7 +507,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15446000" />
+    <option name="totallyTimeSpent" value="16115000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="853" extended-state="0" />
@@ -915,8 +918,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-334">
-          <caret line="189" column="55" lean-forward="true" selection-start-line="189" selection-start-column="55" selection-end-line="189" selection-end-column="55" />
+        <state relative-caret-position="3893">
+          <caret line="233" column="51" lean-forward="false" selection-start-line="233" selection-start-column="51" selection-end-line="233" selection-end-column="51" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
