@@ -201,7 +201,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
 
             List<String> orderByColumnNamesList = StringUtils.isEmpty(orderByColumnNames)
                     ? new ArrayList<>()
-                    : Arrays.asList(maxValueColumnNames.split("\\s*,\\s*"));
+                    : Arrays.asList(orderByColumnNames.split("\\s*,\\s*"));
 
             // fall back to the original implementation .. do the order by the max value column list
             if(orderByColumnNamesList.isEmpty()){
