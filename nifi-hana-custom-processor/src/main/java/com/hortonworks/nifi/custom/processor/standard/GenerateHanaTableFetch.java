@@ -74,7 +74,8 @@ import java.util.stream.IntStream;
         @WritesAttribute(attribute = "generatetablefetch.columnNames", description = "The comma-separated list of column names used in the query."),
         @WritesAttribute(attribute = "generatetablefetch.whereClause", description = "Where clause used in the query to get the expected rows."),
         @WritesAttribute(attribute = "generatetablefetch.maxColumnNames", description = "The comma-separated list of column names used to keep track of data "
-                + "that has been returned since the processor started running."),
+        + "that has been returned since the processor started running."),
+        @WritesAttribute(attribute = "generatetablefetch.orderByColumnNames", description = "The comma-separated list of column names used to order data " ),
         @WritesAttribute(attribute = "generatetablefetch.limit", description = "The number of result rows to be fetched by the SQL statement."),
         @WritesAttribute(attribute = "generatetablefetch.offset", description = "Offset to be used to retrieve the corresponding partition.")
 })
@@ -91,6 +92,14 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             .required(true)
             .expressionLanguageSupported(true)
             .addValidator(StandardValidators.NON_NEGATIVE_INTEGER_VALIDATOR)
+            .build();
+
+    public static final PropertyDescriptor ORDER_BY_COLUMN_NAMES = new PropertyDescriptor.Builder()
+            .name("Order By Columns")
+            .description("A comma-separated list of column names. The processor will use for order BY  " )
+            .required(false)
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .expressionLanguageSupported(true)
             .build();
 
     public static final Relationship REL_FAILURE = new Relationship.Builder()
@@ -113,6 +122,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
         pds.add(MAX_VALUE_COLUMN_NAMES);
         pds.add(QUERY_TIMEOUT);
         pds.add(PARTITION_SIZE);
+        pds.add(ORDER_BY_COLUMN_NAMES);
         propDescriptors = Collections.unmodifiableList(pds);
     }
 
@@ -162,6 +172,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
         final String columnNames = context.getProperty(COLUMN_NAMES).evaluateAttributeExpressions(fileToProcess).getValue();
         final String maxValueColumnNames = context.getProperty(MAX_VALUE_COLUMN_NAMES).evaluateAttributeExpressions(fileToProcess).getValue();
         final int partitionSize = context.getProperty(PARTITION_SIZE).evaluateAttributeExpressions(fileToProcess).asInteger();
+        final String orderByColumnNames = context.getProperty(ORDER_BY_COLUMN_NAMES).evaluateAttributeExpressions(fileToProcess).getValue();
 
         final StateManager stateManager = context.getStateManager();
         final StateMap stateMap;
@@ -185,6 +196,10 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             // latest observed maximum values.
             String whereClause = null;
             List<String> maxValueColumnNameList = StringUtils.isEmpty(maxValueColumnNames)
+                    ? new ArrayList<>(0)
+                    : Arrays.asList(maxValueColumnNames.split("\\s*,\\s*"));
+
+            List<String> orderByColumnNamesList = StringUtils.isEmpty(orderByColumnNames)
                     ? new ArrayList<>(0)
                     : Arrays.asList(maxValueColumnNames.split("\\s*,\\s*"));
 
@@ -301,7 +316,8 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     long limit = partitionSize == 0 ? null : partitionSize;
                     long offset = partitionSize == 0 ? null : i * partitionSize;
                     final String maxColumnNames = StringUtils.join(maxValueColumnNameList, ", ");
-                    final String query = dbAdapter.getSelectStatement(tableName, columnNames, whereClause, maxColumnNames, limit, offset);
+                    final String strOrderByColumnNames = StringUtils.join(orderByColumnNamesList, ", ");
+                    final String query = dbAdapter.getSelectStatement(tableName, columnNames, whereClause, strOrderByColumnNames, limit, offset);
                     FlowFile sqlFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
                     sqlFlowFile = session.write(sqlFlowFile, out -> out.write(query.getBytes()));
                     sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.tableName", tableName);
@@ -314,6 +330,11 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     if (StringUtils.isNotBlank(maxColumnNames)) {
                         sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.maxColumnNames", maxColumnNames);
                     }
+
+                    if (StringUtils.isNotBlank(strOrderByColumnNames)) {
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.orderByColumnNames", strOrderByColumnNames);
+                    }
+
                     sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.limit", String.valueOf(limit));
                     if (partitionSize != 0) {
                         sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.offset", String.valueOf(offset));
