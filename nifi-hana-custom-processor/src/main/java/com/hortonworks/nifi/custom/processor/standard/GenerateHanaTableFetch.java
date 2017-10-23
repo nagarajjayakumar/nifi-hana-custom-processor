@@ -220,7 +220,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     if (type == null && !isDynamicTableName) {
                         // If the table name is static and the fully-qualified key was not found, try just the column name
                         type = columnTypeMap.get(getStateKey(tableName,colName.replace("\"","")));
-                        logger.error("SAP TYPE " + type);
+                        logger.info("SAP TYPE " + type);
                     }
 
                     if (type == null) {
