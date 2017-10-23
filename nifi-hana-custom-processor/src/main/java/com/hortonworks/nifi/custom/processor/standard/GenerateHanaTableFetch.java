@@ -187,6 +187,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             List<String> maxValueColumnNameList = StringUtils.isEmpty(maxValueColumnNames)
                     ? new ArrayList<>(0)
                     : Arrays.asList(maxValueColumnNames.split("\\s*,\\s*"));
+
             List<String> maxValueClauses = new ArrayList<>(maxValueColumnNameList.size());
 
             String columnsClause = null;
@@ -227,12 +228,13 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                         throw new IllegalArgumentException("No column type found for: " + colName);
                     }
                     // Add a condition for the WHERE clause
-                    maxValueClauses.add(colName + (index == 0 ? " > " : " >= ") + getLiteralByType(type, maxValue, dbAdapter.getName()));
+                    // HANA FIX
+                    maxValueClauses.add(colName + (index == 0 ? " > " : " > ") + getLiteralByType(type, maxValue, dbAdapter.getName()));
                 }
             });
 
             // Modified specifically to tackle HANA
-            whereClause = StringUtils.join(maxValueClauses, " AND ");
+            whereClause = StringUtils.join(maxValueClauses, " OR ");
             columnsClause = StringUtils.join(maxValueSelectColumns, ", ");
 
             // Build a SELECT query with maximum-value columns (if present)
