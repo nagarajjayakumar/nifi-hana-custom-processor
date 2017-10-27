@@ -356,9 +356,9 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     session.transfer(sqlFlowFile, REL_SUCCESS);
                 }
 
-                if (fileToProcess != null) {
-                    session.remove(fileToProcess);
-                }
+//                if (fileToProcess != null) {
+//                    session.remove(fileToProcess);
+//                }
             } catch (SQLException e) {
                 if (fileToProcess != null) {
                     logger.error("Unable to execute SQL select query {} due to {}, routing {} to failure", new Object[]{selectQuery, e, fileToProcess});
