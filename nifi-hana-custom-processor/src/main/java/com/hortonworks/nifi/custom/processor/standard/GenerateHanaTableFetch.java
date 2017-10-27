@@ -108,10 +108,16 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     + "If no incoming connection(s) are specified, this relationship is unused.")
             .build();
 
+    public static final Relationship REL_ORIGINAL = new Relationship.Builder()
+            .name("original")
+            .description("original flow files will be routed here")
+            .build();
+
     public GenerateHanaTableFetch() {
         final Set<Relationship> r = new HashSet<>();
         r.add(REL_SUCCESS);
         r.add(REL_FAILURE);
+        r.add(REL_ORIGINAL);
         relationships = Collections.unmodifiableSet(r);
 
         final List<PropertyDescriptor> pds = new ArrayList<>();
@@ -163,6 +169,9 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                 return;
             }
         }
+
+        // Just pass the ORIGINAL flow file to the relationship
+        session.transfer(fileToProcess, REL_ORIGINAL);
 
         final ComponentLog logger = getLogger();
 
