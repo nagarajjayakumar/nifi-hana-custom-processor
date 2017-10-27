@@ -108,8 +108,8 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     + "If no incoming connection(s) are specified, this relationship is unused.")
             .build();
 
-    public static final Relationship REL_ORIGINAL = new Relationship.Builder()
-            .name("original")
+    public static final Relationship REL_NO_STATE_CHANGE = new Relationship.Builder()
+            .name("nostatechange")
             .description("original flow files will be routed here")
             .build();
 
@@ -117,7 +117,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
         final Set<Relationship> r = new HashSet<>();
         r.add(REL_SUCCESS);
         r.add(REL_FAILURE);
-        r.add(REL_ORIGINAL);
+        r.add(REL_NO_STATE_CHANGE);
         relationships = Collections.unmodifiableSet(r);
 
         final List<PropertyDescriptor> pds = new ArrayList<>();
@@ -169,9 +169,6 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                 return;
             }
         }
-
-        // Just pass the ORIGINAL flow file to the relationship
-        session.transfer(fileToProcess, REL_ORIGINAL);
 
         final ComponentLog logger = getLogger();
 
@@ -326,13 +323,15 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                 final long numberOfFetches = (partitionSize == 0) ? rowCount : (rowCount / partitionSize) + (rowCount % partitionSize == 0 ? 0 : 1);
 
                 // Generate SQL statements to read "pages" of data
+                FlowFile sqlFlowFile = null ;
                 for (long i = 0; i < numberOfFetches; i++) {
                     long limit = partitionSize == 0 ? null : partitionSize;
                     long offset = partitionSize == 0 ? null : i * partitionSize;
                     final String maxColumnNames = StringUtils.join(maxValueColumnNameList, ", ");
                     final String strOrderByColumnNames = StringUtils.join(orderByColumnNamesList, ", ");
                     final String query = dbAdapter.getSelectStatement(tableName, columnNames, whereClause, strOrderByColumnNames, limit, offset);
-                    FlowFile sqlFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
+
+                    sqlFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
                     sqlFlowFile = session.write(sqlFlowFile, out -> out.write(query.getBytes()));
                     sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.tableName", tableName);
                     if (columnNames != null) {
@@ -356,9 +355,19 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     session.transfer(sqlFlowFile, REL_SUCCESS);
                 }
 
-//                if (fileToProcess != null) {
-//                    session.remove(fileToProcess);
-//                }
+
+                // Just pass the no State Change Flow File flow file to the relationship in case if there is no sql flow file
+                if(sqlFlowFile == null){
+                    FlowFile noStateChangeFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
+                    session.transfer(noStateChangeFlowFile, REL_NO_STATE_CHANGE);
+                }
+
+                if (fileToProcess != null) {
+                    session.remove(fileToProcess);
+                }
+
+
+
             } catch (SQLException e) {
                 if (fileToProcess != null) {
                     logger.error("Unable to execute SQL select query {} due to {}, routing {} to failure", new Object[]{selectQuery, e, fileToProcess});
