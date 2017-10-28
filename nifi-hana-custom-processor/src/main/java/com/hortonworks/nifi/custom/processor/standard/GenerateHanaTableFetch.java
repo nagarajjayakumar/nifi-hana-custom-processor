@@ -110,7 +110,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
 
     public static final Relationship REL_NO_STATE_CHANGE = new Relationship.Builder()
             .name("nostatechange")
-            .description("If there is no state change.  Flow files will be routed to the nostatechange relationship")
+            .description("If there is no state change for tracked columns.  Flow files will be routed to the nostatechange relationship")
             .build();
 
     public GenerateHanaTableFetch() {

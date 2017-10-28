@@ -61,8 +61,8 @@
       <file leaf-file-name="GenerateHanaTableFetch.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="369">
-              <caret line="112" column="115" lean-forward="false" selection-start-line="112" selection-start-column="115" selection-end-line="112" selection-end-column="115" />
+            <state relative-caret-position="386">
+              <caret line="112" column="73" lean-forward="false" selection-start-line="112" selection-start-column="73" selection-end-line="112" selection-end-column="73" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -496,7 +496,7 @@
       <workItem from="1507823303348" duration="4047000" />
       <workItem from="1508769389692" duration="4848000" />
       <workItem from="1509112652163" duration="1843000" />
-      <workItem from="1509148981296" duration="130000" />
+      <workItem from="1509148981296" duration="312000" />
     </task>
     <servers />
   </component>
@@ -524,7 +524,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24970000" />
+    <option name="totallyTimeSpent" value="25152000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="853" extended-state="0" />
@@ -969,8 +969,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="369">
-          <caret line="112" column="115" lean-forward="false" selection-start-line="112" selection-start-column="115" selection-end-line="112" selection-end-column="115" />
+        <state relative-caret-position="386">
+          <caret line="112" column="73" lean-forward="false" selection-start-line="112" selection-start-column="73" selection-end-line="112" selection-end-column="73" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
