@@ -335,7 +335,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     sqlFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
                     sqlFlowFile = session.write(sqlFlowFile, out -> out.write(query.getBytes()));
                     sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.tableName", tableName);
-                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.rowcount",  rowCount);
+                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.rowcount",  String.valueOf(rowCount));
                     if (columnNames != null) {
                         sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.columnNames", columnNames);
                     }
