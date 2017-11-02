@@ -265,6 +265,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
 
             // Build a SELECT query with maximum-value columns (if present)
             final String selectQuery = dbAdapter.getSelectStatement(tableName, columnsClause, whereClause, null, null, null);
+            logger.error("Count Query " + selectQuery);
             long rowCount = 0;
 
             try (final Connection con = dbcpService.getConnection();
@@ -281,7 +282,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                 if (resultSet.next()) {
                     // Total row count is in the first column
                     rowCount = resultSet.getLong(1);
-
+                    logger.error("rowCount " + rowCount);
                     // Update the state map with the newly-observed maximum values
                     ResultSetMetaData rsmd = resultSet.getMetaData();
                     for (int i = 2; i <= rsmd.getColumnCount(); i++) {
@@ -334,6 +335,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     sqlFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
                     sqlFlowFile = session.write(sqlFlowFile, out -> out.write(query.getBytes()));
                     sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.tableName", tableName);
+                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.rowcount",  rowCount);
                     if (columnNames != null) {
                         sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.columnNames", columnNames);
                     }
