@@ -19,18 +19,18 @@
     <parent>
         <groupId>com.hortonworks.nifi</groupId>
         <artifactId>nifi-hana-custom-processor-bundle</artifactId>
-        <version>1.0</version>
+        <version>2.0</version>
     </parent>
 
     <artifactId>nifi-hana-custom-processor-nar</artifactId>
-    <version>1.0</version>
+    <version>2.0</version>
     <packaging>nar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.hortonworks.nifi</groupId>
             <artifactId>nifi-hana-custom-processor</artifactId>
-            <version>1.0</version>
+            <version>2.0</version>
         </dependency>
     </dependencies>
 
