@@ -49,8 +49,8 @@
       <file leaf-file-name="GenerateHanaTableFetch.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="263">
-              <caret line="100" column="36" selection-start-line="100" selection-start-column="36" selection-end-line="100" selection-end-column="36" />
+            <state relative-caret-position="133">
+              <caret line="99" column="35" selection-start-line="99" selection-start-column="35" selection-end-line="99" selection-end-column="35" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -280,7 +280,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -390,6 +389,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
       <pane id="AndroidView" />
     </panes>
@@ -523,7 +523,8 @@
       <workItem from="1526323898053" duration="830000" />
       <workItem from="1526401287148" duration="1660000" />
       <workItem from="1526407140576" duration="323000" />
-      <workItem from="1526416012635" duration="59000" />
+      <workItem from="1526416012635" duration="810000" />
+      <workItem from="1526417679671" duration="27000" />
     </task>
     <servers />
   </component>
@@ -560,7 +561,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="38057000" />
+    <option name="totallyTimeSpent" value="38835000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="877" extended-state="6" />
@@ -573,7 +574,7 @@
       <window_info anchor="bottom" id="Java Enterprise" order="2" />
       <window_info anchor="right" id="Capture Analysis" order="3" />
       <window_info anchor="bottom" id="Event Log" order="1" side_tool="true" />
-      <window_info anchor="right" id="Maven Projects" order="0" weight="0.3297568" />
+      <window_info anchor="right" id="Maven Projects" order="0" visible="true" weight="0.3297568" />
       <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="3" />
       <window_info anchor="bottom" id="Run" order="7" weight="0.32820514" />
@@ -897,8 +898,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="263">
-          <caret line="100" column="36" selection-start-line="100" selection-start-column="36" selection-end-line="100" selection-end-column="36" />
+        <state relative-caret-position="133">
+          <caret line="99" column="35" selection-start-line="99" selection-start-column="35" selection-end-line="99" selection-end-column="35" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

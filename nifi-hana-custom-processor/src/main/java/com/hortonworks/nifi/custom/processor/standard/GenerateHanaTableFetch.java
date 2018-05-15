@@ -97,7 +97,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             .build();
 
     public static final PropertyDescriptor ORDER_BY_COLUMN_NAMES = new PropertyDescriptor.Builder()
-            .name("order-by-columns")
+            .name("Order By Columns")
             .displayName("Order By Columns")
             .description("A comma-separated list of column names. The processor will use for order BY  " )
             .required(false)

@@ -1,0 +1,3 @@
+com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.class
+com/hortonworks/nifi/custom/processor/standard/ExecuteRemoteCommand$1.class
+com/hortonworks/nifi/custom/processor/standard/ExecuteRemoteCommand.class
