@@ -68,16 +68,16 @@ import java.util.stream.IntStream;
         + "incremental fetching, fetching of newly added rows, etc. To clear the maximum values, clear the state of the processor "
         + "per the State Management documentation")
 @WritesAttributes({
-        @WritesAttribute(attribute = "generatetablefetch.sql.error", description = "If the processor has incoming connections, and processing an incoming flow file causes "
+        @WritesAttribute(attribute = "generatehanatablefetch.sql.error", description = "If the processor has incoming connections, and processing an incoming flow file causes "
                 + "a SQL Exception, the flow file is routed to failure and this attribute is set to the exception message."),
-        @WritesAttribute(attribute = "generatetablefetch.tableName", description = "The name of the database table to be queried."),
-        @WritesAttribute(attribute = "generatetablefetch.columnNames", description = "The comma-separated list of column names used in the query."),
-        @WritesAttribute(attribute = "generatetablefetch.whereClause", description = "Where clause used in the query to get the expected rows."),
-        @WritesAttribute(attribute = "generatetablefetch.maxColumnNames", description = "The comma-separated list of column names used to keep track of data "
+        @WritesAttribute(attribute = "generatehanatablefetch.tableName", description = "The name of the database table to be queried."),
+        @WritesAttribute(attribute = "generatehanatablefetch.columnNames", description = "The comma-separated list of column names used in the query."),
+        @WritesAttribute(attribute = "generatehanatablefetch.whereClause", description = "Where clause used in the query to get the expected rows."),
+        @WritesAttribute(attribute = "generatehanatablefetch.maxColumnNames", description = "The comma-separated list of column names used to keep track of data "
         + "that has been returned since the processor started running."),
-        @WritesAttribute(attribute = "generatetablefetch.orderByColumnNames", description = "The comma-separated list of column names used to order data " ),
-        @WritesAttribute(attribute = "generatetablefetch.limit", description = "The number of result rows to be fetched by the SQL statement."),
-        @WritesAttribute(attribute = "generatetablefetch.offset", description = "Offset to be used to retrieve the corresponding partition.")
+        @WritesAttribute(attribute = "generatehanatablefetch.orderByColumnNames", description = "The comma-separated list of column names used to order data " ),
+        @WritesAttribute(attribute = "generatehanatablefetch.limit", description = "The number of result rows to be fetched by the SQL statement."),
+        @WritesAttribute(attribute = "generatehanatablefetch.offset", description = "Offset to be used to retrieve the corresponding partition.")
 })
 @DynamicProperty(name = "Initial Max Value", value = "Attribute Expression Language", supportsExpressionLanguage = false, description = "Specifies an initial "
         + "max value for max value columns. Properties should be added in the format `initial.maxvalue.{max_value_column}`.")
@@ -104,6 +104,15 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             .expressionLanguageSupported(true)
             .build();
 
+    public static final PropertyDescriptor WHERE_CLAUSE = new PropertyDescriptor.Builder()
+            .name("db-fetch-where-clause")
+            .displayName("Additional WHERE clause")
+            .description("A custom clause to be added in the WHERE condition when generating SQL requests.")
+            .required(false)
+            .expressionLanguageSupported(true)
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .build();
+
     public static final Relationship REL_FAILURE = new Relationship.Builder()
             .name("failure")
             .description("This relationship is only used when SQL query execution (using an incoming FlowFile) failed. The incoming FlowFile will be penalized and routed to this relationship. "
@@ -123,6 +132,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
         relationships = Collections.unmodifiableSet(r);
 
         final List<PropertyDescriptor> pds = new ArrayList<>();
+
         pds.add(DBCP_SERVICE);
         pds.add(DB_TYPE);
         pds.add(TABLE_NAME);
@@ -132,6 +142,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
         pds.add(PARTITION_SIZE);
         pds.add(ORDER_BY_COLUMN_NAMES);
         pds.add(WHERE_CLAUSE);
+
         propDescriptors = Collections.unmodifiableList(pds);
     }
 
@@ -373,25 +384,25 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
 
                     sqlFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
                     sqlFlowFile = session.write(sqlFlowFile, out -> out.write(query.getBytes()));
-                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.tableName", tableName);
-                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.rowcount",  String.valueOf(rowCount));
+                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatehanatablefetch.tableName", tableName);
+                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatehanatablefetch.rowcount",  String.valueOf(rowCount));
                     if (columnNames != null) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.columnNames", columnNames);
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatehanatablefetch.columnNames", columnNames);
                     }
                     if (StringUtils.isNotBlank(whereClause)) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.whereClause", whereClause);
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatehanatablefetch.whereClause", whereClause);
                     }
                     if (StringUtils.isNotBlank(maxColumnNames)) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.maxColumnNames", maxColumnNames);
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatehanatablefetch.maxColumnNames", maxColumnNames);
                     }
 
                     if (StringUtils.isNotBlank(strOrderByColumnNames)) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.orderByColumnNames", strOrderByColumnNames);
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatehanatablefetch.orderByColumnNames", strOrderByColumnNames);
                     }
 
-                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.limit", String.valueOf(limit));
+                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatehanatablefetch.limit", String.valueOf(limit));
                     if (partitionSize != 0) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.offset", String.valueOf(offset));
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatehanatablefetch.offset", String.valueOf(offset));
                     }
                     session.transfer(sqlFlowFile, REL_SUCCESS);
                 }
@@ -412,7 +423,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             } catch (SQLException e) {
                 if (fileToProcess != null) {
                     logger.error("Unable to execute SQL select query {} due to {}, routing {} to failure", new Object[]{selectQuery, e, fileToProcess});
-                    fileToProcess = session.putAttribute(fileToProcess, "generatetablefetch.sql.error", e.getMessage());
+                    fileToProcess = session.putAttribute(fileToProcess, "generatehanatablefetch.sql.error", e.getMessage());
                     session.transfer(fileToProcess, REL_FAILURE);
 
                 } else {
