@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="207c4a9a-01ef-4e80-ade9-434bd7a8b50b" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java" beforeDir="false" afterPath="$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/com/hortonworks/nifi/custom/processor/standard/MyProcessorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/com/hortonworks/nifi/custom/processor/standard/MyProcessorTest.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/nifi-hana-custom-processor/target/" />
@@ -48,11 +50,29 @@
       <file leaf-file-name="GenerateHanaTableFetch.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="267">
-              <caret line="99" column="35" selection-start-line="99" selection-start-column="35" selection-end-line="99" selection-end-column="35" />
+            <state relative-caret-position="70">
+              <caret line="100" column="45" selection-start-line="100" selection-start-column="45" selection-end-line="100" selection-end-column="45" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MyProcessorTest.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/com/hortonworks/nifi/custom/processor/standard/MyProcessorTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="255">
+              <caret line="36" selection-start-line="36" selection-end-line="36" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ServiceLoader.java" pinned="false" current-in-tab="false">
+        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_102.jdk/Contents/Home/src.zip!/java/util/ServiceLoader.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="373">
+              <caret line="536" selection-start-line="536" selection-end-line="536" />
             </state>
           </provider>
         </entry>
@@ -69,19 +89,6 @@
       <file leaf-file-name="DynamicProperty.java" pinned="false" current-in-tab="false">
         <entry file="jar://$MAVEN_REPOSITORY$/org/apache/nifi/nifi-api/1.5.0/nifi-api-1.5.0-sources.jar!/org/apache/nifi/annotation/behavior/DynamicProperty.java">
           <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file leaf-file-name="AbstractDatabaseFetchProcessor.java" pinned="false" current-in-tab="false">
-        <entry file="jar://$MAVEN_REPOSITORY$/org/apache/nifi/nifi-standard-processors/1.5.0/nifi-standard-processors-1.5.0-sources.jar!/org/apache/nifi/processors/standard/AbstractDatabaseFetchProcessor.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="301">
-              <caret line="156" column="21" lean-forward="true" selection-start-line="149" selection-start-column="4" selection-end-line="156" selection-end-column="21" />
-              <folding>
-                <element signature="e#0#23095#0" expanded="true" />
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
         </entry>
       </file>
       <file leaf-file-name="GenerateTableFetch.java" pinned="false" current-in-tab="false">
@@ -109,11 +116,6 @@
               <caret line="28" column="18" selection-start-line="28" selection-start-column="18" selection-end-line="28" selection-end-column="18" />
             </state>
           </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="nifi-hana-custom-processor.iml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/nifi-hana-custom-processor.iml">
-          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -161,7 +163,6 @@
         <option value="$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/standard/GenerateHanaTableFetch.java" />
         <option value="$PROJECT_DIR$/nifi-hana-custom-processor/src/main/resources/META-INF/services/org.apache.nifi.processor.Processor" />
         <option value="$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/org/apache/nifi/processors/example/MyProcessorTest.java" />
-        <option value="$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/com/hortonworks/nifi/custom/processor/standard/MyProcessorTest.java" />
         <option value="$PROJECT_DIR$/.idea/.name" />
         <option value="$MAVEN_REPOSITORY$/org/apache/nifi/nifi-api/1.2.0/nifi-api-1.2.0.jar!/org/apache/nifi/processor/AbstractSessionFactoryProcessor.class" />
         <option value="$MAVEN_REPOSITORY$/org/apache/nifi/nifi-dbcp-service-api/1.2.0/nifi-dbcp-service-api-1.2.0.jar!/org/apache/nifi/dbcp/DBCPService.class" />
@@ -175,6 +176,7 @@
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/nifi-hana-custom-processor/pom.xml" />
         <option value="$PROJECT_DIR$/LICENSE" />
+        <option value="$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/com/hortonworks/nifi/custom/processor/standard/MyProcessorTest.java" />
         <option value="$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java" />
       </list>
     </option>
@@ -314,6 +316,30 @@
               <item name="nifi-hana-custom-processor" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="standard" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="nifi-hana-custom-processor-bundle" type="b2602c69:ProjectViewProjectNode" />
+              <item name="nifi-hana-custom-processor-bundle" type="462c0819:PsiDirectoryNode" />
+              <item name="nifi-hana-custom-processor" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="nifi-hana-custom-processor-bundle" type="b2602c69:ProjectViewProjectNode" />
+              <item name="nifi-hana-custom-processor-bundle" type="462c0819:PsiDirectoryNode" />
+              <item name="nifi-hana-custom-processor" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="nifi-hana-custom-processor-bundle" type="b2602c69:ProjectViewProjectNode" />
+              <item name="nifi-hana-custom-processor-bundle" type="462c0819:PsiDirectoryNode" />
+              <item name="nifi-hana-custom-processor" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="standard" type="462c0819:PsiDirectoryNode" />
             </path>
@@ -491,7 +517,7 @@
       <workItem from="1524130780301" duration="46000" />
       <workItem from="1524494423948" duration="12000" />
       <workItem from="1526323898053" duration="830000" />
-      <workItem from="1526401287148" duration="483000" />
+      <workItem from="1526401287148" duration="766000" />
     </task>
     <servers />
   </component>
@@ -519,7 +545,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="36498000" />
+    <option name="totallyTimeSpent" value="36781000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="853" extended-state="0" />
@@ -527,6 +553,7 @@
     <layout>
       <window_info anchor="right" id="Palette" order="6" />
       <window_info anchor="bottom" id="TODO" order="11" />
+      <window_info anchor="bottom" id="Messages" order="0" weight="0.3298153" />
       <window_info anchor="right" id="Palette&#9;" order="1" />
       <window_info id="Image Layers" order="6" />
       <window_info anchor="bottom" id="Java Enterprise" order="2" />
@@ -539,7 +566,7 @@
       <window_info anchor="bottom" id="Terminal" order="4" weight="0.3298153" />
       <window_info id="Capture Tool" order="0" />
       <window_info id="Designer" order="1" />
-      <window_info content_ui="combo" id="Project" order="4" visible="true" weight="0.2811159" />
+      <window_info active="true" content_ui="combo" id="Project" order="4" visible="true" weight="0.2811159" />
       <window_info anchor="right" id="Bean Validation" order="4" />
       <window_info anchor="right" id="Database" order="2" weight="0.3297568" />
       <window_info id="Structure" order="5" side_tool="true" weight="0.25" />
@@ -547,8 +574,7 @@
       <window_info id="UI Designer" order="2" />
       <window_info anchor="right" id="Theme Preview" order="5" />
       <window_info id="Favorites" order="3" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="8" weight="0.39973614" />
-      <window_info anchor="bottom" id="Messages" order="0" weight="0.3298153" />
+      <window_info anchor="bottom" id="Debug" order="8" visible="true" weight="0.3994709" />
       <window_info anchor="bottom" id="Inspection" order="10" weight="0.4" />
       <window_info anchor="right" id="Commander" order="7" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="9" weight="0.25" />
@@ -572,8 +598,14 @@
           <properties />
           <option name="timeStamp" value="1" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/com/hortonworks/nifi/custom/processor/standard/MyProcessorTest.java</url>
+          <line>36</line>
+          <properties />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="2" />
+      <option name="time" value="3" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -732,13 +764,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/db/DatabaseAdapter.java" />
     <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/db/impl/GenericDatabaseAdapter.java" />
-    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_102.jdk/Contents/Home/src.zip!/java/util/ServiceLoader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8398">
-          <caret line="537" selection-start-line="537" selection-end-line="537" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/AbstractDatabaseFetchProcessor.java" />
     <entry file="jar://$MAVEN_REPOSITORY$/org/apache/nifi/nifi-standard-processors/1.2.0/nifi-standard-processors-1.2.0-sources.jar!/org/apache/nifi/processors/standard/db/DatabaseAdapter.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -765,17 +790,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
           <caret line="39" column="4" selection-start-line="39" selection-start-column="4" selection-end-line="39" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/com/hortonworks/nifi/custom/processor/standard/MyProcessorTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="29" column="11" selection-start-line="29" selection-start-column="11" selection-end-line="29" selection-end-column="11" />
-          <folding>
-            <element signature="e#1151#1152#0" />
-            <element signature="e#1235#1236#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -827,9 +841,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/apache/nifi/nifi-api/1.5.0/nifi-api-1.5.0-sources.jar!/org/apache/nifi/annotation/behavior/DynamicProperty.java">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
@@ -853,8 +864,8 @@
     </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/org/apache/nifi/nifi-standard-processors/1.5.0/nifi-standard-processors-1.5.0-sources.jar!/org/apache/nifi/processors/standard/AbstractDatabaseFetchProcessor.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="301">
-          <caret line="156" column="21" lean-forward="true" selection-start-line="149" selection-start-column="4" selection-end-line="156" selection-end-column="21" />
+        <state relative-caret-position="-413">
+          <caret line="158" column="39" selection-start-line="158" selection-start-column="39" selection-end-line="158" selection-end-column="39" />
           <folding>
             <element signature="e#0#23095#0" expanded="true" />
             <element signature="imports" expanded="true" />
@@ -862,10 +873,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/apache/nifi/nifi-api/1.5.0/nifi-api-1.5.0-sources.jar!/org/apache/nifi/annotation/behavior/DynamicProperty.java">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_102.jdk/Contents/Home/src.zip!/java/util/ServiceLoader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="373">
+          <caret line="536" selection-start-line="536" selection-end-line="536" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/test/java/com/hortonworks/nifi/custom/processor/standard/MyProcessorTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="36" selection-start-line="36" selection-end-line="36" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/nifi-hana-custom-processor/src/main/java/com/hortonworks/nifi/custom/processor/standard/GenerateHanaTableFetch.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="267">
-          <caret line="99" column="35" selection-start-line="99" selection-start-column="35" selection-end-line="99" selection-end-column="35" />
+        <state relative-caret-position="70">
+          <caret line="100" column="45" selection-start-line="100" selection-start-column="45" selection-end-line="100" selection-end-column="45" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

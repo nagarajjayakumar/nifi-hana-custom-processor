@@ -34,6 +34,7 @@ public class MyProcessorTest {
 
     @Test
     public void testProcessor() throws InitializationException {
+        System.out.print("");
 //        // create the ControllerService, configure, and enable it
 //        final StandardMyService service = new StandardMyService();
 //        testRunner.addControllerService("myService", service);
