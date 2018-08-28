@@ -20,8 +20,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.nifi.annotation.behavior.*;
 import org.apache.nifi.annotation.behavior.InputRequirement.Requirement;
 import org.apache.nifi.annotation.documentation.CapabilityDescription;
+import org.apache.nifi.annotation.documentation.SeeAlso;
 import org.apache.nifi.annotation.documentation.Tags;
 import org.apache.nifi.annotation.lifecycle.OnScheduled;
+import org.apache.nifi.annotation.lifecycle.OnStopped;
 import org.apache.nifi.components.PropertyDescriptor;
 import org.apache.nifi.components.ValidationContext;
 import org.apache.nifi.components.ValidationResult;
@@ -29,6 +31,7 @@ import org.apache.nifi.components.state.Scope;
 import org.apache.nifi.components.state.StateManager;
 import org.apache.nifi.components.state.StateMap;
 import org.apache.nifi.dbcp.DBCPService;
+import org.apache.nifi.expression.ExpressionLanguageScope;
 import org.apache.nifi.flowfile.FlowFile;
 import org.apache.nifi.logging.ComponentLog;
 import org.apache.nifi.processor.ProcessContext;
@@ -38,8 +41,10 @@ import org.apache.nifi.processor.Relationship;
 import org.apache.nifi.processor.exception.ProcessException;
 import org.apache.nifi.processor.util.StandardValidators;
 import org.apache.nifi.processors.standard.AbstractDatabaseFetchProcessor;
+import org.apache.nifi.processors.standard.ExecuteSQL;
+import org.apache.nifi.processors.standard.ListDatabaseTables;
+import org.apache.nifi.processors.standard.QueryDatabaseTable;
 import org.apache.nifi.processors.standard.db.DatabaseAdapter;
-
 
 import java.io.IOException;
 import java.sql.*;
@@ -52,6 +57,7 @@ import java.util.stream.IntStream;
 @TriggerSerially
 @InputRequirement(Requirement.INPUT_ALLOWED)
 @Tags({"sql", "select", "jdbc", "query", "database", "fetch", "generate"})
+@SeeAlso({QueryDatabaseTable.class, ExecuteSQL.class, ListDatabaseTables.class})
 @CapabilityDescription("Generates SQL select queries that fetch \"pages\" of rows from a table. The partition size property, along with the table's row count, "
         + "determine the size and number of pages and generated FlowFiles. In addition, incremental fetching can be achieved by setting Maximum-Value Columns, "
         + "which causes the processor to track the columns' maximum values, thus only fetching rows whose columns' values exceed the observed maximums. This "
@@ -74,12 +80,12 @@ import java.util.stream.IntStream;
         @WritesAttribute(attribute = "generatetablefetch.columnNames", description = "The comma-separated list of column names used in the query."),
         @WritesAttribute(attribute = "generatetablefetch.whereClause", description = "Where clause used in the query to get the expected rows."),
         @WritesAttribute(attribute = "generatetablefetch.maxColumnNames", description = "The comma-separated list of column names used to keep track of data "
-        + "that has been returned since the processor started running."),
-        @WritesAttribute(attribute = "generatetablefetch.orderByColumnNames", description = "The comma-separated list of column names used to order data " ),
+                + "that has been returned since the processor started running."),
         @WritesAttribute(attribute = "generatetablefetch.limit", description = "The number of result rows to be fetched by the SQL statement."),
         @WritesAttribute(attribute = "generatetablefetch.offset", description = "Offset to be used to retrieve the corresponding partition.")
 })
-@DynamicProperty(name = "Initial Max Value", value = "Attribute Expression Language", supportsExpressionLanguage = false, description = "Specifies an initial "
+@DynamicProperty(name = "Initial Max Value", value = "Attribute Expression Language",
+        expressionLanguageScope = ExpressionLanguageScope.NONE, description = "Specifies an initial "
         + "max value for max value columns. Properties should be added in the format `initial.maxvalue.{max_value_column}`.")
 public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
 
@@ -92,7 +98,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     + "in the table.")
             .defaultValue("10000")
             .required(true)
-            .expressionLanguageSupported(true)
+            .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
             .addValidator(StandardValidators.NON_NEGATIVE_INTEGER_VALIDATOR)
             .build();
 
@@ -102,7 +108,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             .description("A comma-separated list of column names. The processor will use for order BY  " )
             .required(false)
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-            .expressionLanguageSupported(true)
+            .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
             .build();
 
     public static final PropertyDescriptor WHERE_CLAUSE = new PropertyDescriptor.Builder()
@@ -110,7 +116,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             .displayName("Additional WHERE clause")
             .description("A custom clause to be added in the WHERE condition when generating SQL requests.")
             .required(false)
-            .expressionLanguageSupported(true)
+            .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .build();
 
@@ -166,19 +172,23 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
     @OnScheduled
     public void setup(final ProcessContext context) {
         maxValueProperties = getDefaultMaxValueProperties(context.getProperties());
-
-        // Pre-fetch the column types if using a static table name and max-value columns
-        if (!isDynamicTableName && !isDynamicMaxValues) {
-            super.setup(context);
-        }
-
         if (context.hasIncomingConnection() && !context.hasNonLoopConnection()) {
             getLogger().error("The failure relationship can be used only if there is another incoming connection to this processor.");
         }
     }
 
+    @OnStopped
+    public void stop() {
+        // Reset the column type map in case properties change
+        setupComplete.set(false);
+    }
+
     @Override
     public void onTrigger(final ProcessContext context, final ProcessSessionFactory sessionFactory) throws ProcessException {
+        // Fetch the column/table info once (if the table name and max value columns are not dynamic). Otherwise do the setup later
+        if (!isDynamicTableName && !isDynamicMaxValues && !setupComplete.get()) {
+            super.setup(context);
+        }
         ProcessSession session = sessionFactory.createSession();
 
         FlowFile fileToProcess = null;
@@ -223,7 +233,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             // If an initial max value for column(s) has been specified using properties, and this column is not in the state manager, sync them to the state property map
             for (final Map.Entry<String, String> maxProp : maxValueProperties.entrySet()) {
                 String maxPropKey = maxProp.getKey().toLowerCase();
-                String fullyQualifiedMaxPropKey = getStateKey(tableName, maxPropKey);
+                String fullyQualifiedMaxPropKey = getStateKey(tableName, maxPropKey, dbAdapter);
                 if (!statePropertyMap.containsKey(fullyQualifiedMaxPropKey)) {
                     String newMaxPropValue;
                     // If we can't find the value at the fully-qualified key name, it is possible (under a previous scheme)
@@ -268,7 +278,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                 String colName = maxValueColumnNameList.get(index);
                 maxValueSelectColumns.add("MAX(" + colName + ") " + colName);
 
-                String maxValue =  getColumnStateMaxValue(tableName, statePropertyMap, colName);
+                String maxValue =  getColumnStateMaxValue(tableName, statePropertyMap, colName, dbAdapter);
 
                 if (!StringUtils.isEmpty(maxValue)) {
 
@@ -277,7 +287,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                         super.setup(context, false, finalFileToProcess);
                     }
 
-                    Integer type = getColumnType(tableName, colName);
+                    Integer type = getColumnType(tableName, colName, dbAdapter);
 
                     // Add a condition for the WHERE clause
                     // HANA FIX
@@ -320,7 +330,7 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                         // Since this column has been aliased lets check the label first,
                         // if there is no label we'll use the column name.
                         String resultColumnName = (StringUtils.isNotEmpty(rsmd.getColumnLabel(i))?rsmd.getColumnLabel(i):rsmd.getColumnName(i)).toLowerCase();
-                        String fullyQualifiedStateKey = getStateKey(tableName, resultColumnName);
+                        String fullyQualifiedStateKey = getStateKey(tableName, resultColumnName, dbAdapter);
                         String resultColumnCurrentMax = statePropertyMap.get(fullyQualifiedStateKey);
                         if (StringUtils.isEmpty(resultColumnCurrentMax) && !isDynamicTableName) {
                             // If we can't find the value at the fully-qualified key name and the table name is static, it is possible (under a previous scheme)
@@ -340,9 +350,9 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                             if (newMaxValue != null) {
                                 statePropertyMap.put(fullyQualifiedStateKey, newMaxValue);
                             }
-                        } catch (ParseException | IOException pie) {
+                        } catch (ParseException | IOException | ClassCastException pice) {
                             // Fail the whole thing here before we start creating flow files and such
-                            throw new ProcessException(pie);
+                            throw new ProcessException(pice);
                         }
 
                     }
@@ -356,13 +366,13 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     String colName = maxValueColumnNameList.get(index);
 
                     maxValueSelectColumns.add("MAX(" + colName + ") " + colName);
-                    String maxValue = getColumnStateMaxValue(tableName, statePropertyMap, colName);
+                    String maxValue = getColumnStateMaxValue(tableName, statePropertyMap, colName,dbAdapter);
                     if (!StringUtils.isEmpty(maxValue)) {
                         if(columnTypeMap.isEmpty()){
                             // This means column type cache is clean after instance reboot. We should re-cache column type
                             super.setup(context, false, finalFileToProcess);
                         }
-                        Integer type = getColumnType(tableName, colName);
+                        Integer type = getColumnType(tableName, colName, dbAdapter);
 
                         // Add a condition for the WHERE clause
                         maxValueClauses.add(colName + " <= " + getLiteralByType(type, maxValue, dbAdapter.getName()));
@@ -452,44 +462,44 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
     }
 
 
-    private String getColumnStateMaxValue(String tableName, Map<String, String> statePropertyMap, String colName) {
-        final String fullyQualifiedStateKey = getStateKey(tableName, colName);
+    private String getColumnStateMaxValue(String tableName, Map<String, String> statePropertyMap, String colName, DatabaseAdapter dbAdapter) {
+        final String fullyQualifiedStateKey = getStateKey(tableName, colName, dbAdapter);
         String maxValue = statePropertyMap.get(fullyQualifiedStateKey);
         if (StringUtils.isEmpty(maxValue) && !isDynamicTableName) {
             // If the table name is static and the fully-qualified key was not found, try just the column name
-            maxValue = statePropertyMap.get(getStateKey(null, colName));
+            maxValue = statePropertyMap.get(getStateKey(null, colName, dbAdapter));
         }
         // Hana Fix -- might be a Hana table naming convention try
         if (StringUtils.isEmpty(maxValue) && !isDynamicTableName) {
             // If the table name is static and the fully-qualified key was not found, try just the column name
-            maxValue = statePropertyMap.get(getStateKey(tableName,colName.replace("\"","")));
+            maxValue = statePropertyMap.get(getStateKey(tableName,colName.replace("\"",""), dbAdapter));
         }
 
 
         if (StringUtils.isEmpty(maxValue) && !isDynamicTableName) {
             // If the table name is static and the fully-qualified key was not found, try just the column name
-            maxValue = statePropertyMap.get(getStateKey(tableName,colName.replace(null,"")));
+            maxValue = statePropertyMap.get(getStateKey(tableName,colName.replace(null,""),dbAdapter));
         }
         return maxValue;
     }
 
-    private Integer getColumnType(String tableName, String colName) {
-        final String fullyQualifiedStateKey = getStateKey(tableName, colName);
+    private Integer getColumnType(String tableName, String colName, DatabaseAdapter dbAdapter) {
+        final String fullyQualifiedStateKey = getStateKey(tableName, colName, dbAdapter);
         Integer type = columnTypeMap.get(fullyQualifiedStateKey);
         if (type == null && !isDynamicTableName) {
             // If the table name is static and the fully-qualified key was not found, try just the column name
-            type = columnTypeMap.get(getStateKey(null, colName));
+            type = columnTypeMap.get(getStateKey(null, colName, dbAdapter));
         }
 
         // Hana and Static Table
         if (type == null && !isDynamicTableName) {
             // If the table name is static and the fully-qualified key was not found, try just the column name
-            type = columnTypeMap.get(getStateKey(null,colName.replace("\"","")));
+            type = columnTypeMap.get(getStateKey(null,colName.replace("\"",""), dbAdapter));
         }
 
         // SAP HANA FIXES -- might be a Hana table naming convention try
         if (type == null && !isDynamicTableName) {
-            type = columnTypeMap.get(getStateKey(tableName,colName.replace("\"","")));
+            type = columnTypeMap.get(getStateKey(tableName,colName.replace("\"",""), dbAdapter));
         }
 
         if (type == null) {
@@ -499,4 +509,6 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
 
         return type;
     }
+
+
 }
