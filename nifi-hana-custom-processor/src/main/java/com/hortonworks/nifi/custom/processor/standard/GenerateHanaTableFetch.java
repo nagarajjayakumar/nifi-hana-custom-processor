@@ -16,6 +16,7 @@ package com.hortonworks.nifi.custom.processor.standard;
  * limitations under the License.
  */
 
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.nifi.annotation.behavior.*;
 import org.apache.nifi.annotation.behavior.InputRequirement.Requirement;
@@ -171,11 +172,12 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
     @Override
     @OnScheduled
     public void setup(final ProcessContext context) {
-        maxValueProperties = getDefaultMaxValueProperties(context.getProperties());
+        maxValueProperties = getDefaultMaxValueProperties(context, null);
         if (context.hasIncomingConnection() && !context.hasNonLoopConnection()) {
             getLogger().error("The failure relationship can be used only if there is another incoming connection to this processor.");
         }
     }
+
 
     @OnStopped
     public void stop() {
@@ -268,6 +270,9 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
             }
 
             List<String> maxValueClauses = new ArrayList<>(maxValueColumnNameList.size());
+            List<String> rangeWhereClauses = new ArrayList<>(maxValueColumnNameList.size());
+            List<String> maxValues = new ArrayList<>((maxValueColumnNameList.size()));
+
 
             String columnsClause = null;
             List<String> maxValueSelectColumns = new ArrayList<>(maxValueColumnNameList.size() + 1);
@@ -291,7 +296,9 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
 
                     // Add a condition for the WHERE clause
                     // HANA FIX
-                    maxValueClauses.add(colName + (index == 0 ? " > " : " > ") + getLiteralByType(type, maxValue, dbAdapter.getName()));
+                    // Changed to sign from > to >= to account for changes when using a date as a delta pointer
+                    maxValueClauses.add(colName + (maxValue.equals("0") ? " > " : " >= ") + getLiteralByType(type, maxValue, dbAdapter.getName()));
+                    maxValues.add(maxValue);
                 }
             });
 
@@ -360,15 +367,16 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
                     // Something is very wrong here, one row (even if count is zero) should be returned
                     throw new SQLException("No rows returned from metadata query: " + selectQuery);
                 }
+                //Update the clause logic for upper and lower bounds in HANA
 
                 // for each maximum-value column get a right bounding WHERE condition
                 IntStream.range(0, maxValueColumnNameList.size()).forEach((index) -> {
                     String colName = maxValueColumnNameList.get(index);
 
                     maxValueSelectColumns.add("MAX(" + colName + ") " + colName);
-                    String maxValue = getColumnStateMaxValue(tableName, statePropertyMap, colName,dbAdapter);
+                    String maxValue = getColumnStateMaxValue(tableName, statePropertyMap, colName, dbAdapter);
                     if (!StringUtils.isEmpty(maxValue)) {
-                        if(columnTypeMap.isEmpty()){
+                        if (columnTypeMap.isEmpty()) {
                             // This means column type cache is clean after instance reboot. We should re-cache column type
                             super.setup(context, false, finalFileToProcess);
                         }
@@ -376,47 +384,84 @@ public class GenerateHanaTableFetch extends AbstractDatabaseFetchProcessor{
 
                         // Add a condition for the WHERE clause
                         maxValueClauses.add(colName + " <= " + getLiteralByType(type, maxValue, dbAdapter.getName()));
+                        maxValues.add(maxValue);
+
                     }
                 });
 
                 //Update WHERE list to include new right hand boundaries
-                whereClause = StringUtils.join(maxValueClauses, " AND ");
+                if(maxValueClauses.size() <= maxValueColumnNameList.size()) { //If there was a pre-existing state
+                    whereClause = StringUtils.join(maxValueClauses, " OR ");
+                }else { //Construct a where clause that searches for values with-in the prev & new state range
+                    IntStream.range(0, ((maxValueClauses.size()/2))).forEach((index) -> {
+                        String clauseOne = maxValueClauses.get(index);
+                        String clauseTwo = maxValueClauses.get(index + ((maxValueClauses.size()/2)));
+                        int clauseLength = clauseOne.length();
 
+
+
+                        //For cases when the value timestamp value is 0
+                        if(!clauseOne.substring(clauseLength-2,clauseLength).equals(" 0"))
+                        {
+                            rangeWhereClauses.add("(" + clauseOne + " AND " + clauseTwo + ")");
+                        }else{
+                            rangeWhereClauses.add("(" + clauseOne + ")");
+                        }
+
+                    });
+                    whereClause = StringUtils.join(rangeWhereClauses, " OR ");
+                }
+
+                boolean stateChange;
+                if(maxValues.size()>maxValueColumnNameList.size()) {
+                    stateChange = false;
+                    for (int i = 0; i < maxValues.size() / 2; i++) {
+                        String prevMaxValue = maxValues.get(i);
+                        String newMaxValue = maxValues.get(i + ((maxValueClauses.size() / 2)));
+                        if (!prevMaxValue.equals(newMaxValue) && !stateChange) {
+                            stateChange = true;
+                            break;
+                        }
+                    }
+                }else{
+                    stateChange = true;
+                }
                 final long numberOfFetches = (partitionSize == 0) ? 1 : (rowCount / partitionSize) + (rowCount % partitionSize == 0 ? 0 : 1);
 
                 // Generate SQL statements to read "pages" of data
                 FlowFile sqlFlowFile = null ;
-                for (long i = 0; i < numberOfFetches; i++) {
-                    Long limit = partitionSize == 0 ? null : (long) partitionSize;
-                    Long offset = partitionSize == 0 ? null : i * partitionSize;
-                    final String maxColumnNames = StringUtils.join(maxValueColumnNameList, ", ");
-                    final String strOrderByColumnNames = StringUtils.join(orderByColumnNamesList, ", ");
-                    final String query = dbAdapter.getSelectStatement(tableName, columnNames, whereClause, strOrderByColumnNames, limit, offset);
+                if(stateChange){
+                    for (long i = 0; i < numberOfFetches; i++) {
+                        Long limit = partitionSize == 0 ? null : (long) partitionSize;
+                        Long offset = partitionSize == 0 ? null : i * partitionSize;
+                        final String maxColumnNames = StringUtils.join(maxValueColumnNameList, ", ");
+                        final String strOrderByColumnNames = StringUtils.join(orderByColumnNamesList, ", ");
+                        final String query = dbAdapter.getSelectStatement(tableName, columnNames, whereClause, strOrderByColumnNames, limit, offset);
 
-                    sqlFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
-                    sqlFlowFile = session.write(sqlFlowFile, out -> out.write(query.getBytes()));
-                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.tableName", tableName);
-                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.rowcount",  String.valueOf(rowCount));
-                    if (columnNames != null) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.columnNames", columnNames);
-                    }
-                    if (StringUtils.isNotBlank(whereClause)) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.whereClause", whereClause);
-                    }
-                    if (StringUtils.isNotBlank(maxColumnNames)) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.maxColumnNames", maxColumnNames);
-                    }
+                        sqlFlowFile = (fileToProcess == null) ? session.create() : session.create(fileToProcess);
+                        sqlFlowFile = session.write(sqlFlowFile, out -> out.write(query.getBytes()));
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.tableName", tableName);
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.rowcount",  String.valueOf(rowCount));
+                        if (columnNames != null) {
+                            sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.columnNames", columnNames);
+                        }
+                        if (StringUtils.isNotBlank(whereClause)) {
+                            sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.whereClause", whereClause);
+                        }
+                        if (StringUtils.isNotBlank(maxColumnNames)) {
+                            sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.maxColumnNames", maxColumnNames);
+                        }
 
-                    if (StringUtils.isNotBlank(strOrderByColumnNames)) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.orderByColumnNames", strOrderByColumnNames);
-                    }
+                        if (StringUtils.isNotBlank(strOrderByColumnNames)) {
+                            sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.orderByColumnNames", strOrderByColumnNames);
+                        }
 
-                    sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.limit", String.valueOf(limit));
-                    if (partitionSize != 0) {
-                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.offset", String.valueOf(offset));
-                    }
-                    session.transfer(sqlFlowFile, REL_SUCCESS);
-                }
+                        sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.limit", String.valueOf(limit));
+                        if (partitionSize != 0) {
+                            sqlFlowFile = session.putAttribute(sqlFlowFile, "generatetablefetch.offset", String.valueOf(offset));
+                        }
+                        session.transfer(sqlFlowFile, REL_SUCCESS);
+                    }}
 
 
                 // Just pass the no State Change Flow File flow file to the relationship in case if there is no sql flow file
